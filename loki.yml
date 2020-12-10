@@ -1,0 +1,32 @@
+---
+- name: Deployment of Loki Helm on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       loki_user : esegniga
+  #     elastic_host: https://elasticmonit.dactechnologies.net:443
+
+  tasks:
+
+      ###### Installation of Loki Helm  ##### 
+
+
+      - name: copy loki values file form remote host 
+        fetch: 
+           src: /home/esegniga/k8s_deploy/loki/loki.values 
+           dest: /etc/ansible/DebianHosts/conf_files/loki/
+           flat: yes 
+          
+      - name: copy bash lokin script to the remote 
+        copy: 
+          src: /etc/ansible/DebianHosts/conf_files/loki/install.sh 
+          dest: /home/esegniga/loki
+          owner: "{{loki_user}}"
+          group: "{{loki_user}}"
+          mode: '0777'
+
+      - name: execute bash loki script on the remote machine 
+        shell: /home/esegniga/loki/install.sh  

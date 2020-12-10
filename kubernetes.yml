@@ -1,0 +1,73 @@
+---
+- name: Deployment of Kubernetes on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       docker_user : esegniga
+       k8s_repo: /etc/ansible/DebianHosts/conf_files/kubernetes.list
+
+  tasks:
+      
+      - name: install gpg, curl, wget 
+        apt:
+          name: "{{item}}"
+          state: present
+        with_items:
+          - gpg
+          - wget
+          - curl 
+        
+      - name: add kubernetes key to repository 
+        apt_key:
+          url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+          state: present
+
+      - name: add Kubernetes repository 
+        copy:
+          src: "{{k8s_repo}}"
+          dest: /etc/apt/sources.list.d/
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: update repository 
+        command: apt update  
+
+      - name: installation of Kuberneetes 
+        apt: 
+          name: "{{ item }}"
+          state : present
+        with_items:
+          - kubelet
+          - kubeadm 
+          - kubectl
+
+      - name: enable and start kubelet 
+        command: "{{item}}"
+        with_items:
+          - swapoff -a
+          - systemctl enable kubelet.service
+          - systemctl start kubelet.service
+
+      - name: copy kubernetes init, calico , coredns bash script to the remote host
+        copy:
+          src: "{{item}}"
+          dest: /home/esegniga
+          owner: "{{docker_user}}"
+          group: "{{docker_user}}"
+          mode: 0777
+
+        with_items:
+          - /etc/ansible/DebianHosts/conf_files/install_calico.sh
+          - /etc/ansible/DebianHosts/conf_files/kubeinit.sh
+
+      - name: execute kubernetes,calico bash script to init kubernetes cluster, install calico
+        shell: "{{item}}"
+        with_items:
+          - /home/esegniga/kubeinit.sh
+          - /home/esegniga/install_calico.sh
+          
+

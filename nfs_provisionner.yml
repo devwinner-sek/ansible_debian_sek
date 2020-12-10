@@ -1,0 +1,71 @@
+---
+- name: Deployment of nfs-provisionner on Kubernetes Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+  vars:
+       provisionner_name: debian-monitor/nfs
+       nfs_server_ip: 192.168.40.53 
+       nfs_file_rbac: /etc/ansible/DebianHosts/conf_files/nfs-git/rbac.yaml
+       nfs_file_class: /etc/ansible/DebianHosts/conf_files/nfs-git/class.yaml
+       nfs_file_deployment: /etc/ansible/DebianHosts/conf_files/nfs-git/deployment.yaml
+
+  tasks:
+
+      ########## Installation of nfs-server ##########
+      - name: install nfs-server package 
+        apt: 
+          name: "{{item}}"
+          state: present
+        with_items:
+          - nfs-kernel-server 
+          - portmap
+
+      - name: create nfs folder /srv/nfs/kubedata/
+        file: 
+          path: /srv/nfs/kubedata/
+          state: directory
+          owner: root
+          group: root
+          mode: '0755'
+
+      - name: enable and start nfs-server 
+        command: "{{item}}"
+        with_items:
+          - systemctl enable nfs-server
+          - systemctl start  nfs-server
+
+      - name: add  nfs folder to /etc/exports
+        lineinfile: 
+          path: /etc/exports 
+          line: /srv/nfs/kubedata    *(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)
+
+      - name: export nfs folder added in /etc/exports
+        command: exportfs -rav
+
+     ############## Deployment of nfs provisionner in Kubernetes cluster #########
+
+      - name: copy rbac nfs  file to remote host
+        copy:
+          src: "{{nfs_file_rbac}}"
+          dest: /home/esegniga 
+
+      - name: copy class, deployement nfs file to the remote host 
+        template: 
+          src: "{{ item }}" 
+          dest: /home/esegniga
+        with_items:
+          - '{{nfs_file_class}}'
+          - '{{nfs_file_deployment}}'
+
+      - name: copy nfs bash script to remote host 
+        copy:
+          src: /etc/ansible/DebianHosts/conf_files/nfs_provisionner.sh
+          dest: /home/esegniga
+          owner: esegniga
+          group: esegniga
+          mode : '0777'
+
+      - name: execute nfs bash script 
+        shell: /home/esegniga/nfs_provisionner.sh

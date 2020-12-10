@@ -1,0 +1,27 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://192.168.40.50:32324/loki/api/v1/push
+#    basic_auth:
+#       username: 'esegniga'
+#       password: 'LoKKi@PA42B9'
+
+scrape_configs:
+
+
+  ############## Creation de job pour Syslog #############
+
+  - job_name: system_job_k8s
+    pipeline_stages:
+    static_configs:
+    - targets:
+        - 192.168.40.50
+      labels:
+        job: varlogs_k8s-monit
+        host: k8s-monit
+        __path__: /var/log/{*.log,syslog,auth.log}

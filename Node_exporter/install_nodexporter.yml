@@ -1,0 +1,71 @@
+---
+- name: Installation of Node exporter on Debian
+  hosts: master2
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+  vars:
+       nodexporter_user: root
+       ## Node exporter url to download ##  
+       nodexporter_release: https://github.com/prometheus/node_exporter/releases/download/v1.0.0-rc.0/node_exporter-1.0.0-rc.0.linux-amd64.tar.gz 
+       ## Node exporter tar.gz file ## 
+       nodexporter_file: node_exporter-1.0.0-rc.0.linux-amd64.tar.gz
+       ## Node exporter bin file ## 
+       nodexporter_bin_remote: node_exporter-1.0.0-rc.0.linux-amd64/node_exporter
+
+      ## Node exporter service file ## 
+       nodexporter_svice_file: /etc/ansible/DebianHosts/node_exporter.service
+
+       ## Node exporter service file on the remote host## 
+       nodexporter_svice_remote: /etc/systemd/system/node_exporter.service
+        
+  tasks:
+
+
+      #  ### Task to install Node_exporter on Centos ####
+      - name: install wget curl on centos
+        apt:
+          name: "{{item}}"
+          state: present 
+        with_items:
+          - wget
+          - curl
+          - tar 
+
+      - name: download Node_exporter tar.gz file
+        command: wget "{{nodexporter_release}}"
+
+      - name: uncompress Node_exporter file
+        command: tar -zxvf "{{nodexporter_file}}"
+
+      - name: copy Node_exporter bash script to the remote host
+        copy:
+          src: "{{ nodexporter_bin_remote }}"
+          dest: /usr/local/bin/
+          owner: "{{nodexporter_user}}"
+          group: "{{nodexporter_user}}"
+          mode: '0744'
+          remote_src: yes
+
+      - name: create symbolic lin /usr/bin/node_exporter 
+        shell: "{{item}}" 
+        with_items:
+          - ln -s /usr/local/bin/node_exporter /usr/bin/node_exporter
+#          - useradd -rs /bin/false node_exporter
+
+      - name: copy node_exporter service file 
+        copy: 
+          src: "{{nodexporter_svice_file}}"
+          dest: /usr/lib/systemd/system/
+          owner: root
+          group: root
+          mode: '0644'
+
+      - name: enable and restart node_exporter service 
+        command: "{{item}}"
+        with_items: 
+          - systemctl daemon-reload
+          - systemctl enable node_exporter
+          - systemctl start node_exporter
+              
+     

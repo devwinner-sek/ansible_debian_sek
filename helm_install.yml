@@ -1,0 +1,40 @@
+---
+- name: Deployment of Helm  on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       docker_user : esegniga
+  #     elastic_host: https://elasticmonit.dactechnologies.net:443
+
+  tasks:
+
+      ###### Installation of Helm ##### 
+
+      - name: add Helm  key 
+        apt_key: 
+          url: https://baltocdn.com/helm/signing.asc 
+          state: present
+
+      - name: add helm repo to debian 
+        lineinfile: 
+           path: /etc/apt/sources.list
+           line:  deb https://baltocdn.com/helm/stable/debian/ all main
+
+     
+      - name: update debian package 
+        command: apt update 
+
+      - name: install Helm on debian 
+        apt: 
+          name: helm 
+          state: present 
+
+
+      - name: update helm repo 
+        command: "{{item}}"
+        with_items: 
+          - helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+          - helm repo update     

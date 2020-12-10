@@ -1,0 +1,29 @@
+---
+- name: Deployment of Helm  on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       docker_user : esegniga
+  #     elastic_host: https://elasticmonit.dactechnologies.net:443
+       kubeinit_file: /etc/ansible/DebianHosts/conf_files/kubeinit.sh
+       kubeinit_dest: /home/esegniga/ENV/kubeinit.sh
+  tasks:
+
+      ###### Installation of Helm ##### 
+      - name: copy kubinit file to remote 
+        copy:
+          src: "{{kubeinit_file}}"
+          dest: /home/esegniga/ENV
+          owner: esegniga
+          group: esegniga
+          mode: '0700'
+
+      - name: init variable ENV
+        shell:  "{{kubeinit_dest}}"
+        environment:
+             IP_ADDRESS: 192.168.40.56
+
+       

@@ -1,0 +1,46 @@
+---
+- name: Test env on Debian ansible 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       helm_user : esegniga
+       destination_script: /home/esegniga
+       helm_remote_bash: /home/esegniga/get_helm.sh
+
+  tasks:
+
+      ###### Installation of Helm ##### 
+      - name: include kubernetes variable file
+        include_vars: /etc/ansible/CentosHosts/chatbotk8s_testdeploy/ansible/var_ansible/install_k8s_var.yml
+
+      - name : create directory 
+        file: 
+           path: "{{bash_folder_remote}}"
+           state: directory
+           owner: dacbot
+           group: dacbot 
+           mode: '0700' 
+
+      - name: copy kubernetes init, calico, coredns bash script on the remote host
+        copy:
+          src: "{{item}}"
+          dest: "{{bash_folder_remote}}"
+          owner: "{{docker_user}}"
+          group: "{{docker_user}}"
+          mode: 0700
+          
+        environment:
+             ## Env variable hostname of remote host #
+           NODE_MASTER_HOSTNAME : centos-ansible
+             ##Env variable ip address of remote host#
+           IP_NODEMASTER        : 192.168.1.1
+             ## ##Env variable network address of remote host#
+           IP_NETWORK_NODE      : 192.168.1.0/20
+
+        with_items:
+          - '{{ calico_bash_ansible }}'
+          - '{{ k8sinit_bash_ansible }}'
+      

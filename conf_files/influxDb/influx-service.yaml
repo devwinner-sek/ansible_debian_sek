@@ -1,0 +1,12 @@
+apiVersion: v1  
+kind: Service  
+metadata:  
+  name: influxdb-service 
+  namespace: kube-system  
+spec:  
+  selector:  
+    app: influxdb
+  type: NodePort  
+  ports:
+    - port: 8086  
+      nodePort: 32306

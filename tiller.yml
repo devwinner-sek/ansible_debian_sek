@@ -1,0 +1,39 @@
+---
+- name: Deployment of Tiller Helm on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       tiller_user : esegniga
+       tiller_bash_folder: /home/esegniga
+       tiller_bash_remote: /home/esegniga/tiller.sh 
+
+  #     elastic_host: https://elasticmonit.dactechnologies.net:443
+
+  tasks:
+
+      ###### Installation of Tiller Helm ##### 
+
+
+#      - name: copy tiller bash script to the remote host 
+#        copy: 
+#          src: /etc/ansible/DebianHosts/conf_files/prometheus_grafana/tiller.sh 
+#          dest: "{{ tiller_bash_folder }}"
+#          owner: "{{ tiller_user }}" 
+#          group: "{{ tiller_user }}"
+#          mode: '0777'
+
+    #  - name: execute tiller bash script on the remote 
+    #    shell: "{{tiller_bash_remote}}"   
+
+      - name: copy elasticsearch helm files from the remote 
+        fetch: 
+           src: "{{item}}" 
+           dest: /etc/ansible/DebianHosts/conf_files/elkstack/
+           flat: yes 
+        with_items:
+           - /home/esegniga/k8s_deploy/Elk/EFK-Kubernetes/elksearch.values
+           - /home/esegniga/k8s_deploy/Elk/EFK-Kubernetes/kibana.values
+           - /home/esegniga/k8s_deploy/Elk/EFK-Kubernetes/pvc.yaml

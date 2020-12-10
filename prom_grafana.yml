@@ -1,0 +1,60 @@
+---
+- name: Deployment of Proemtheus Grafana Helm k8s  on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       prometheus_path: /prometheus-data 
+       storage_class: managed-nfs-storage
+       node_port: 32322
+       owner_file: esegniga
+       bash_source : /etc/ansible/DebianHosts/conf_files/prometheus_grafana/install.sh
+       bash_destination: /home/esegniga/k8s_deploy/Helm/prom_grafana/
+       bash_remote: /home/esegniga/k8s_deploy/Helm/prom_grafana/install.sh 
+      
+  #     elastic_host: https://elasticmonit.dactechnologies.net:443
+
+  tasks:
+
+#      - name: copy remote helm prometheus grafana helm files *
+#        fetch: 
+#          src: "{{item}}"
+#          dest: /etc/ansible/DebianHosts/conf_files/prometheus_grafana/
+#          flat: yes 
+#        with_items: 
+#          - /home/esegniga/k8s_deploy/Helm/prom_grafana/prometheus.values
+#          - /home/esegniga/k8s_deploy/Helm/prom_grafana/grafana.values
+
+#      - name: copy of prometheus helm values file to the remote host
+#        copy: 
+#           src: /etc/ansible/DebianHosts/conf_files/prometheus_grafana/prometheus.values
+#           dest: /home/esegniga/k8s_deploy/Helm/prom_grafana/ 
+#           owner: "{{owner_file}}"
+#           group : "{{owner_file}}"
+#           mode: '0755'
+#
+#      
+#
+#      - name: copy grafana helm values file to the remote host 
+#        copy:
+#           src: /etc/ansible/DebianHosts/conf_files/prometheus_grafana/grafana.values
+#           dest: /home/esegniga/k8s_deploy/Helm/prom_grafana/
+#           owner: "{{owner_file}}"
+#           group : "{{owner_file}}"
+#           mode: '0755'
+
+#      - name: copy prometheus grafana bash script to the remote host 
+#        copy: 
+#          src: "{{bash_source}}"
+#          dest: "{{bash_destination}}" 
+#          owner: "{{owner_file}}"
+#          group: "{{owner_file}}"
+#          mode: '0777'
+         
+      - name: install prometheus grafana using bash script 
+        shell:  "{{ bash_remote }}"
+
+
+      

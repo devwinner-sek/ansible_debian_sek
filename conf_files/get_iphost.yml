@@ -1,0 +1,9 @@
+- name: get loadbalancer ip
+  set_fact:
+     loadbalancer_ip: "{{hostvars['centos-loadbalancer'].ansible_host}}"
+
+
+- name: set docker ip address for each host
+  set_fact:
+     docker_metric_url: "{{ ansible_ssh_host }}:9323"
+     influxdb_url_val: "http://{{hostvars['centos-loadbalancer'].ansible_host}}:8086"

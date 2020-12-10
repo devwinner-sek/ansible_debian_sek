@@ -1,0 +1,53 @@
+---
+- name: Deployment of Docker on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       docker_user : esegniga
+  #     elastic_host: https://elasticmonit.dactechnologies.net:443
+
+  tasks:
+
+      - name: update package 
+        command: apt update 
+
+      - name: installation of prerequisite packages for Docker 
+        apt: name= {{ item }}
+        with_items:
+          - apt-transport-https
+          - ca-certificates 
+          - curl 
+          - gnupg2 
+          - software-properties-common
+ 
+      - name: add docker key 
+        apt_key:
+          url: https://download.docker.com/linux/debian/gpg
+          state: present
+
+      - name: add docker repository 
+        lineinfile:
+          path: /etc/apt/sources.list 
+          line: deb https://download.docker.com/linux/debian buster stable
+
+      - name: update repository 
+        command: apt update 
+
+      - name: installation of docker 
+        apt: 
+          name: docker-ce
+          state: present
+
+      - name: add user to docker group 
+        user: 
+          name: "{{docker_user}}"
+          group:  docker
+
+      - name: start and enable docker 
+        command: "{{item}}"
+        with_items:
+          - systemctl enable docker.service
+          - systemctl start docker.service 

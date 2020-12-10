@@ -1,0 +1,38 @@
+---
+- name: Deployment of Helm  on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       docker_user : esegniga
+  #     elastic_host: https://elasticmonit.dactechnologies.net:443
+       kubeinit_file: /etc/ansible/DebianHosts/conf_files/kubeinit.sh
+       kubeinit_dest: /home/esegniga/ENV/kubeinit.sh
+  tasks:
+
+      ###### Installation of Helm ##### 
+      - name: create folder for ssh key
+        file: 
+          path: /home/esegniga/ansible_key
+          state:  directory
+          mode: '0700'
+
+      - name: copy ssh key to remote 
+        copy:
+          src: /home/esegniga/.ssh/id_rsa
+#          dest: /home/esegniga/ansible_key/
+#          owner: esegniga
+#          group: esegniga
+#          mode: '0700'
+#
+#      - name: clone git project
+#        git: 
+#         repo: 'ssh://git@gitlab.dactechnologies.net:23012/chatbotgit/chatbot_ansible.git'
+#         dest: /home/esegniga/GIT/
+#         key_file: /home/esegniga/ansible_key/id_rsa
+#         accept_hostkey: yes
+#         clone: yes
+#        
+

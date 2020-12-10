@@ -1,0 +1,63 @@
+---
+- name: Deployment of Telegraf collecter for influxDb on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       telegraf_user : esegniga
+       tiller_bash_folder: /home/esegniga
+       tiller_bash_remote: /home/esegniga/tiller.sh 
+
+  #     elastic_host: https://elasticmonit.dactechnologies.net:443
+
+  tasks:
+
+      ###### Installation of Tiller Helm ##### 
+
+
+#      - name: add telegraf key to repository
+#        apt_key:
+#          url : https://repos.influxdata.com/influxdb.key
+#          state: present 
+#        
+#      - name: add telegraf repo to sources files 
+#        lineinfile: 
+#           path: /etc/apt/sources.list 
+#           line: deb https://repos.influxdata.com/debian buster stable
+#
+#      - name: update repo 
+#        command: apt update 
+# 
+#      - name: install telegraf on the remote host 
+#        apt: 
+#          name: telegraf
+#          state: present 
+#
+#
+#      - name: enable and start telegraf 
+#        command: "{{item}}"
+#        with_items: 
+#          - systemctl enable telegraf
+#          - systemctl start telegraf  
+           
+#      - name: copy telegraf conf files from the remote 
+#        fetch:
+#           src: /etc/telegraf/telegraf.conf
+#           dest: /etc/ansible/DebianHosts/conf_files/
+#           flat: yes 
+
+
+
+       - name: copy telegraf conf file to the remote with updates 
+         copy: 
+           src: /etc/ansible/DebianHosts/conf_files/telegraf.conf
+           dest: /etc/telegraf/
+           owner: root
+           group: root
+           mode: '0755'
+
+
+       - name: restart telegraf service 
+         command: service telegraf restart 

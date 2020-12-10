@@ -1,0 +1,55 @@
+---
+- name: Deployement Promtail ansible on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  vars: 
+         ### Declaration of variables ######### 
+          promtail_conf_file: /etc/ansible/DebianHosts/conf_files/loki_promtail/config-promtail.yml
+          promtail_service_file : /etc/ansible/DebianHosts/conf_files/loki_promtail/promtail.service
+
+  tasks:
+
+     - name: download promtail binary 
+       command: wget -O promtail.gz https://github.com/grafana/loki/releases/download/v1.4.1/promtail-linux-amd64.zip
+       args:
+          chdir: /home/{{ansible_ssh_user}}/ 
+         
+     - name: unzip promtail file 
+       command: gunzip /home/{{ansible_ssh_user}}/promtail.gz 
+
+     - name: give execute right to promtail 
+       command: chmod a+x /home/{{ansible_ssh_user}}/promtail
+
+     - name: copy promtail file to /usr/local/bin
+       copy: 
+         src: /home/{{ansible_ssh_user}}/promtail
+         dest: /usr/local/bin/
+         remote_src: yes 
+       become: true
+     
+     - name: copy configuration file config-promtail.yml to remote /usr/local/bin
+       copy: 
+         src: "{{ promtail_conf_file}}"
+         dest: /usr/local/bin/
+          owner: root
+          group: root 
+          mode: '0755'
+
+     - name: create service file for promtail 
+       copy: 
+         src: "{{promtail_service_file }}"
+         dest: /etc/systemd/system/promtail.service
+         owner: root
+         group: root
+         mode: '0755'
+ 
+     - name: enable , restart service promtail 
+       command: " {{ item }} "
+       with_items: 
+         - systemctl enable promtail 
+         - service promtail restart 
+
+     
+  
+

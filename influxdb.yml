@@ -1,0 +1,40 @@
+---
+- name: Deployment of Influxdb using Kubernetes on Debian 
+  hosts: DebianHosts
+  become: yes
+  become_method: sudo
+  ############ Declaration of variables #############
+
+  vars:
+       owner_file : esegniga
+       tiller_bash_folder: /home/esegniga
+       tiller_bash_remote: /home/esegniga/tiller.sh 
+
+  tasks:
+
+      ########## Installation of InfluxDb ## 
+       
+
+#      - name: copy influxdb manifests from the remote host  
+#        fetch:
+#          src: "{{item}}"
+#          dest: /etc/ansible/DebianHosts/conf_files/
+#          flat: yes  
+#
+#        with_items:
+#           - /home/esegniga/influxDb/influx-service.yaml
+#           - /home/esegniga/influxDb/influx-secrets.yaml 
+#           - /home/esegniga/influxDb/influx-deploy.yaml 
+#           - /home/esegniga/influxDb/pvc.yaml
+
+      - name: copy influxdb bash script on the remote host 
+        copy:
+          src: /etc/ansible/DebianHosts/conf_files/influxDb/install.sh 
+          dest: /home/esegniga/influxDb
+          owner: "{{owner_file}}"
+          group: "{{ owner_file}}"
+          mode : '0777'
+       
+
+      - name: execute bash script to install influxDb 
+        shell: /home/esegniga/influxDb/install.sh
